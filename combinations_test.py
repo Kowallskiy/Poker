@@ -50,8 +50,5 @@ def pairs():
     pairs = list(combinations(queens, 2))
     print(pairs)
     s = ['Qd', 'Qh']
-    if s in pairs:
-        print('Yes')
-    else:
-        print("no")
+    print(set(s).issubset(pairs))
 pairs()
