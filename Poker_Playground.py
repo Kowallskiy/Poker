@@ -15,6 +15,23 @@ def number_of_players():
         else:
             print("Invalid number of players")
 
+def deposit():
+    while True:
+        deposit = input("How much do you want to deposit? The minimum deposit is $100 and maximum is $10000.  $")
+        if deposit.isdigit() and int(deposit) in range(100, 10001):
+            return int(deposit)
+        else:
+            print("Please enter a valid number")
+
+def tables():
+    print("There are 3 tables available for playing. The first requires $100 to buy-in, the second - $1000, and the last one - $10000")
+    while True:
+        table = input('At what table do you want to play? (1) - $100, (2) - $1000, (3) - $10000 ')
+        if table.isdigit() and int(table) in range(1, 4):
+            return int(table)
+        else:
+            print("Wrong table")
+
 def cards_dealing(players):
     players_cards = []
     for _ in range(players):
@@ -24,6 +41,45 @@ def cards_dealing(players):
         players_cards.append(x)
     print(players_cards)
     return players_cards
+
+# There must be a better way to write this function. Optimize it 
+def bet_preflop(table, balance):
+    if table == 1:
+        while True:
+            bet = input("What is your bet? $")
+            if bet.isdigit() and 1 <= int(bet) <= balance:
+                return int(bet)
+            else:
+                if bet.isdigit() == False:
+                    print("Please, enter a number")
+                elif int(bet) < 1:
+                    print('You cannot bet less than $1')
+                elif int(bet) > balance:
+                    print(f"You do not have that much to bet. Your balance is ${balance}")
+    elif table == 2:
+        while True:
+            bet = input("What is your bet? $")
+            if bet.isdigit() and 10 <= int(bet) <= balance:
+                return int(bet)
+            else:
+                if bet.isdigit() == False:
+                    print("Please, enter a number")
+                elif int(bet) < 10:
+                    print('You cannot bet less than $10')
+                elif int(bet) > balance:
+                    print(f"You do not have that much to bet. Your balance is ${balance}")
+    elif table == 3:
+        while True:
+            bet = input("What is your bet? $")
+            if bet.isdigit() and 100 <= int(bet) <= balance:
+                return int(bet)
+            else:
+                if bet.isdigit() == False:
+                    print("Please, enter a number")
+                elif int(bet) < 100:
+                    print('You cannot bet less than $100')
+                elif int(bet) > balance:
+                    print(f"You do not have that much to bet. Your balance is ${balance}")
 
 def flop():
     flop = random.sample(deck, 3)
@@ -80,7 +136,7 @@ def combinations(players_cards, river):
         value_counts = defaultdict(lambda: 0)
         for v in value:
             value_counts[v] += 1
-        if value_counts.value == [2, 3]:
+        if sorted(value_counts.value) == [2, 3]:
             return True
         else:
             return False
@@ -109,12 +165,42 @@ def combinations(players_cards, river):
         
     def check_three_of_a_kind(cards):
         values = [i[0] for i in cards]
+        value_counts = defaultdict(lambda: 0)
+        for v in values:
+            value_counts[v] += 1
+        if sorted(value_counts.values) == [1, 3]:
+            return True
+        else:
+            return False
+        
+    def check_check_two_pairs(cards):
+        value = [i[0] for i in cards]
+        value_counts = defaultdict(lambda: 0)
+        for v in value:
+            value_counts[v] += 1
+        if sorted(value_counts.value) == [2, 2]:
+            return True
+        else:
+            return False
+        
+    def check_one_pair(cards):
+        value = [i[0] for i in cards]
+        value_counts = defaultdict(lambda: 0)
+        for v in value:
+            value_counts[v] += 1
+        if sorted(value_counts.value) == [1, 2]:
+            return True
+        else:
+            return False
 
     pass
     
 def main():
+    balance = deposit()
+    table = tables()
     players = number_of_players()
     players_cards = cards_dealing(players)
+    bet_preflop(table, balance)
     flopp = flop()
     ter = tern(flopp)
     riv = river(ter)
