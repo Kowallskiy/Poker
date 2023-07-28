@@ -126,16 +126,30 @@ def heads_up_1st_table(balance):
         ...
     if answer == 'call':
         # Write how the opponent will respond to player's call
-
-        call()
+        if 0 <= random.random() <= 0.85:
+            print("The opponent checks.")
+            flop()
+        elif 0.85 < random.random() < 1:
+            rise(bank, opponents_balance, balance, big_blind)
     elif answer == 'raise':
         rise()
     elif answer == 'fold':
         ...
     
+    pass
 
-
-
+# The opponent raises his bet!
+# I think I must make sure that the opponent will not bet more than he has
+def rise(bank, opponents_balance, balance, big_blind):
+    print(f"The opponent raises ${3 * big_blind}")
+    opponents_balance -= 3 * big_blind
+    bank += 3 * big_blind
+    while True:
+        answer = input(f"Do you want to call ${3 * big_blind}, reraise or fold?")
+        if answer.lower() == 'call':
+            balance -= 3 * big_blind
+            bank += 3 * big_blind
+            return answer, bank, balance
 
     pass
 
