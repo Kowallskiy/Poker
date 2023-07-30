@@ -226,9 +226,16 @@ def heads_up_1st_table(balance):
     bank, balance, opponents_balance = round_f(answer, bank, balance, opponents_balance, big_blind)
     if balance == 0 or opponents_balance == 0:
         ...
-    flop()
+    flopp = flop()
     answer = round_after_preflop()
     balance, opponents_balance, bank = opponent_after_preflop(answer, balance, opponents_balance, bank, big_blind)
+    riv = tern(flopp)
+    answer = round_after_preflop()
+    balance, opponents_balance, bank = opponent_after_preflop(answer, balance, opponents_balance, bank, big_blind)
+    river(riv)
+    answer = round_after_preflop()
+    balance, opponents_balance, bank = opponent_after_preflop(answer, balance, opponents_balance, bank, big_blind)
+    
     pass
 
 # The opponent raises his bet!
