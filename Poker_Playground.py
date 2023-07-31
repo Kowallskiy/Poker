@@ -6,6 +6,7 @@ RANK = "AKQJT98765432"
 SUIT = "cdhs"
 DECK = list(''.join(card) for card in itertools.product(RANK, SUIT))
 deck = DECK[:]
+hand_dict = {9:"straight-flush", 8:"four-of-a-kind", 7:"full-house", 6:"flush", 5:"straight", 4:"three-of-a-kind", 3:"two-pairs", 2:"one-pair", 1:"highest-card"}
 
 # I think I will delete this function because it is going to be heads-up
 def number_of_players():
@@ -111,15 +112,20 @@ def round_f(answer, bank, balance, opponents_balance, big_blind):
         # Write how the opponent will respond to player's call
         if 0 <= random.random() <= 0.85:
             print("The opponent checks.")
+            print(f"Your balance is ${balance}. The opponent's balance is ${opponents_balance}")
+            print(f"The bank is ${bank}")
+            return bank, balance, opponents_balance, False
         elif 0.85 < random.random() < 1:
-            bank, balance, opponents_balance = rise(bank, opponents_balance, balance, big_blind)
-            return bank, balance, opponents_balance
+            bank, balance, opponents_balance, folded = rise(bank, opponents_balance, balance, big_blind)
+            return bank, balance, opponents_balance, folded
     elif answer == 'raise':
         while True:
             raise_ = input("How much do you want to raise? $")
             if raise_.isdigit() and 2 < int(raise_) <= balance:
                 bank += int(raise_)
                 balance -= int(raise_)
+                print(f"Your balance is ${balance}. The opponent's balance is ${opponents_balance}")
+                print(f"The bank is ${bank}")
                 break
             else:
                 print("Invalid raise")
@@ -128,14 +134,16 @@ def round_f(answer, bank, balance, opponents_balance, big_blind):
                 print(f"The opponent called with his last money ${opponents_balance}")
                 bank += opponents_balance
                 opponents_balance = 0
-                return bank, balance, opponents_balance
+                print(f"Your balance is ${balance}. The opponent's balance is ${opponents_balance}")
+                print(f"The bank is ${bank}")
+                return bank, balance, opponents_balance, False
             else:
                 print(f"The opponent called ${raise_}")
                 bank += int(raise_)
                 opponents_balance -= int(raise_)
-                return bank, balance, opponents_balance
-    elif answer == 'fold':
-        ...
+                print(f"Your balance is ${balance}. The opponent's balance is ${opponents_balance}")
+                print(f"The bank is ${bank}")
+                return bank, balance, opponents_balance, False
     pass
 
 # This function receives an action from the player on the cmall blind after he/she saw the flop
@@ -148,40 +156,81 @@ def round_after_preflop():
             return first_round.lower()
         else:
             print("Invalid input")
-    pass
 
 def opponent_after_preflop(answer, balance, opponents_balance, bank, big_blind):
     if answer == 'check':
         if 0 <= random.random() <= 0.3:
             print('The opponent checks')
-            return balance, opponents_balance, bank
+            print(f"Your balance is ${balance}. The opponent's balance is ${opponents_balance}")
+            print(f"The bank is ${bank}")
+            return balance, opponents_balance, bank, False
         else:
             if opponents_balance >= 3 * big_blind:
                 print(f"The opponent bets ${3*big_blind}")
                 bank += 3*big_blind
                 opponents_balance -= 3*big_blind
+                print(f"Your balance is ${balance}. The opponent's balance is ${opponents_balance}")
+                print(f"The bank is ${bank}")
             else:
                 print(f"The opponent bets the last ${opponents_balance}")
                 bank += opponents_balance
                 last_bet = opponents_balance
                 opponents_balance = 0
+                print(f"Your balance is ${balance}. The opponent's balance is ${opponents_balance}")
+                print(f"The bank is ${bank}")
             if opponents_balance == 0:
-                response = input(f"The opponent bet last ${last_bet}. Do you want to call or fold? ")
+                response = input(f"The opponent bets last ${last_bet}. Do you want to call or fold? ")
                 while True:
                     if response.lower() == 'call':
                         bank += last_bet
                         balance -= last_bet
-                        return balance, opponents_balance, bank
+                        print(f"Your balance is ${balance}. The opponent's balance is ${opponents_balance}")
+                        print(f"The bank is ${bank}")
+                        return balance, opponents_balance, bank, False
                     elif response.lower() == 'fold':
-                        ...
+                        opponents_balance += bank
+                        print(f"Your balance is ${balance}. The opponent's balance is ${opponents_balance}")
+                        print(f"The bank is ${bank}")
+                        return balance, opponents_balance, bank, True
                     else:
                         print("Invalid response")
             else:
+                # CHeck whether somebody folded
                 response = input(f"The opponent bet ${3*big_blind}. Do you want to call, rearaise or fold? ")
-                bank, balance, opponents_balance = opponent_bets(response, big_blind, bank, balance, opponents_balance)
-                return balance, opponents_balance, bank
-
-    pass
+                bank, balance, opponents_balance, folded = opponent_bets(response, big_blind, bank, balance, opponents_balance)
+                print(f"Your balance is ${balance}. The opponent's balance is ${opponents_balance}")
+                print(f"The bank is ${bank}")
+                if folded == True:
+                    return balance, opponents_balance, bank, True
+                else:
+                    return balance, opponents_balance, bank, False
+    elif answer == 'bet':
+        while True:
+            response = input("How much do you want to bet? $")
+            if response.isdigit() and int(response) >= 2:
+                bank += int(response)
+                balance -= int(response)
+                print(f"Your balance is ${balance}. The opponent's balance is ${opponents_balance}")
+                print(f"The bank is ${bank}")
+                break
+            else:
+                print('Invalid bet!')
+        if 0 <= random.random() < 0.25:
+            print('Opponent folded')
+            balance += bank
+            return balance, opponents_balance, bank, True
+        elif 0.25 <= random.random() < 0.75:
+            print(f"The opponent called ${response}")
+            bank += int(response)
+            opponents_balance -= int(response)
+            print(f"Your balance is ${balance}. The opponent's balance is ${opponents_balance}")
+            print(f"The bank is ${bank}")
+            return balance, opponents_balance, bank, False
+        else:
+            bank, balance, opponents_balance, folded = rise(bank, opponents_balance, balance, int(response))
+            print(f"Your balance is ${balance}. The opponent's balance is ${opponents_balance}")
+            print(f"The bank is ${bank}")
+            return bank, balance, opponents_balance, folded
 
 # The player's response to the opponent's bet
 def opponent_bets(answer, big_blind, bank, balance, opponents_balance):
@@ -189,7 +238,9 @@ def opponent_bets(answer, big_blind, bank, balance, opponents_balance):
         if answer.lower() == 'call':
             balance -= 3 * big_blind
             bank += 3 * big_blind
-            return bank, balance, opponents_balance
+            print(f"Your balance is ${balance}. The opponent's balance is ${opponents_balance}")
+            print(f"The bank is ${bank}")
+            return bank, balance, opponents_balance, False
         elif answer.lower() == 'reraise':
             while True:
                 reraise = input("How much do you want to reraise? ")
@@ -201,41 +252,74 @@ def opponent_bets(answer, big_blind, bank, balance, opponents_balance):
                         print(f"The opponent called ${reraise}")
                         bank += int(reraise)
                         opponents_balance -= int(reraise)
-                        return bank, balance, opponents_balance
+                        print(f"Your balance is ${balance}. The opponent's balance is ${opponents_balance}")
+                        print(f"The bank is ${bank}")
+                        return bank, balance, opponents_balance, False
                     else:
                         print("The opponent folded")
-                        ...
+                        balance += bank
+                        return bank, balance, opponents_balance, True
                 else:
                     print("Invalid reraise")
         elif answer.lower() == 'fold':
-            ...
+            opponents_balance += bank
+            return bank, balance, opponents_balance, True
         else:
             print("Invalid action")
-    pass
+
 # I must come up with how I will play against simple AI. How can i realize it?
 # It might be a good idea to use class for the opponent
-def heads_up_1st_table(balance):
+def heads_up_1st_table(balance, players):
     small_blind = 1
     big_blind = 2
     opponents_balance = 200
-    bank = 3
-    bank, answer, balance, opponents_balance = preflop_round(small_blind, bank, balance, opponents_balance)
-    if balance == 0 or opponents_balance == 0:
-        ...
+    while True:
+        bank = 3
+        players_cards = cards_dealing(players)
+        bank, answer, balance, opponents_balance = preflop_round(small_blind, bank, balance, opponents_balance)
+        if balance == 0 or opponents_balance == 0:
+            print(f"Your balance is ${balance}. The opponent's balance is ${opponents_balance}")
+            print(f"The bank is ${bank}")
+            flopp = flop()
+            riv = tern(flopp)
+            dec = river(riv)
+        if answer == 'fold':
+            continue
+        bank, balance, opponents_balance, folded = round_f(answer, bank, balance, opponents_balance, big_blind)
+        if folded == True:
+            continue
+        if balance == 0 or opponents_balance == 0:
+            ...
+        flopp = flop()
+        answer = round_after_preflop()
+        balance, opponents_balance, bank, folded = opponent_after_preflop(answer, balance, opponents_balance, bank, big_blind)
+        if folded == True:
+            continue
+        riv = tern(flopp)
+        answer = round_after_preflop()
+        balance, opponents_balance, bank, folded = opponent_after_preflop(answer, balance, opponents_balance, bank, big_blind)
+        if folded == True:
+            continue
+        dec = river(riv)
+        answer = round_after_preflop()
+        balance, opponents_balance, bank, folded = opponent_after_preflop(answer, balance, opponents_balance, bank, big_blind)
+        if folded == True:
+            continue
+        players_best_combination, players_score = play(players_cards[0], dec)
+        opponents_best_combination, opponents_score = play(players_cards[1], dec)
 
-    bank, balance, opponents_balance = round_f(answer, bank, balance, opponents_balance, big_blind)
-    if balance == 0 or opponents_balance == 0:
-        ...
-    flopp = flop()
-    answer = round_after_preflop()
-    balance, opponents_balance, bank = opponent_after_preflop(answer, balance, opponents_balance, bank, big_blind)
-    riv = tern(flopp)
-    answer = round_after_preflop()
-    balance, opponents_balance, bank = opponent_after_preflop(answer, balance, opponents_balance, bank, big_blind)
-    river(riv)
-    answer = round_after_preflop()
-    balance, opponents_balance, bank = opponent_after_preflop(answer, balance, opponents_balance, bank, big_blind)
-    
+        print(f"You have {players_best_combination}, the opponent has {opponents_best_combination}")
+        print(f"The deck is {dec}")
+        if players_score > opponents_score:
+            print(f"You won ${bank}")
+            balance += bank
+        elif opponents_score > players_score:
+            print(f"The opponent won ${bank}")
+            opponents_balance += bank
+        else:
+            print(f"It is a tie.")
+            balance += bank / 2
+            opponents_balance += bank / 2
     pass
 
 # The opponent raises his bet!
@@ -249,7 +333,7 @@ def rise(bank, opponents_balance, balance, big_blind):
         if answer.lower() == 'call':
             balance -= 3 * big_blind
             bank += 3 * big_blind
-            return bank, balance, opponents_balance
+            return bank, balance, opponents_balance, False
         elif answer.lower() == 'reraise':
             while True:
                 reraise = input("How much do you want to reraise? ")
@@ -261,14 +345,16 @@ def rise(bank, opponents_balance, balance, big_blind):
                         print(f"The opponent called ${reraise}")
                         bank += int(reraise)
                         opponents_balance -= int(reraise)
-                        return bank, balance, opponents_balance
+                        return bank, balance, opponents_balance, False
                     else:
                         print("The opponent folded")
-                        ...
+                        balance += bank
+                        return bank, balance, opponents_balance, True
                 else:
                     print("Invalid reraise")
         elif answer.lower() == 'fold':
-            ...
+            opponents_balance += bank
+            return bank, balance, opponents_balance, True
         else:
             print("Invalid action")
 
@@ -297,12 +383,9 @@ def river(river):
     return river
 
 # This function checks all possible combinations. It is not finished 
-def combinations(players_cards, river):
+def combinations(cards):
     ranks_count = {'2': 1, '3': 2, '4': 3, '5': 4, '6': 5, '7': 6, '8': 7, '9': 8, 'T': 9, 'J': 10, 'Q': 11, 'K': 12, 'A': 13}
-
-    cards = players_cards[0] + river
-    print(cards)
-
+    
     # Finish it later
     def check_royal_flash(cards):
         values_r = [i[0] for i in cards]
@@ -310,28 +393,28 @@ def combinations(players_cards, river):
         values_count = defaultdict(lambda: 0)
         pass
 
-    def street_flash(cards):
+    def check_street_flush(cards):
         if check_flush(cards) and check_street(cards):
             return True
         else:
             return False
         
     def check_four_of_a_kind(cards):
-        value = [i[0] for i in cards]
+        values = [i[0] for i in cards]
         value_counts = defaultdict(lambda: 0)
-        for v in value:
+        for v in values:
             value_counts[v] += 1
-        if sorted(value_counts.value) == [1, 4]:
+        if sorted(value_counts.values) == [1, 4]:
             return True
         else:
             return False
         
     def check_full_house(cards):
-        value = [i[0] for i in cards]
+        values = [i[0] for i in cards]
         value_counts = defaultdict(lambda: 0)
-        for v in value:
+        for v in values:
             value_counts[v] += 1
-        if sorted(value_counts.value) == [2, 3]:
+        if sorted(value_counts.values) == [2, 3]:
             return True
         else:
             return False
@@ -347,15 +430,17 @@ def combinations(players_cards, river):
         # I wrote it for 5 cards, but my variable cards consists of 7 cards
         # which means it is not going to work. I need to fix it later
     def check_street(cards):
-        value = [i[0] for i in cards]
+        values = [i[0] for i in cards]
         value_counts = defaultdict(lambda: 0)
-        for v in value:
+        for v in values:
             value_counts[v] += 1
-        rank_score = [ranks_count[i] for i in value]
+        rank_score = [ranks_count[i] for i in values]
         rank_range = max(rank_score) - min(rank_score)
-        if rank_range == 4 and len(set(value_counts.value)) == 1:
+        if rank_range == 4 and len(set(value_counts.values)) == 1:
             return True
         else:
+            if set(values) == set(['A', '2', '3', '4', '5']):
+                return True
             return False
         
     def check_three_of_a_kind(cards):
@@ -368,45 +453,69 @@ def combinations(players_cards, river):
         else:
             return False
         
-    def check_check_two_pairs(cards):
-        value = [i[0] for i in cards]
+    def check_two_pairs(cards):
+        values = [i[0] for i in cards]
         value_counts = defaultdict(lambda: 0)
-        for v in value:
+        for v in values:
             value_counts[v] += 1
-        if sorted(value_counts.value) == [2, 2]:
+        if sorted(value_counts.values) == [2, 2]:
             return True
         else:
             return False
         
     def check_one_pair(cards):
-        value = [i[0] for i in cards]
+        values = [i[0] for i in cards]
         value_counts = defaultdict(lambda: 0)
-        for v in value:
+        for v in values:
             value_counts[v] += 1
-        if sorted(value_counts.value) == [1, 2]:
+        if sorted(value_counts.values) == [1, 2]:
             return True
         else:
             return False
+    
+    if check_street_flush(cards) == True:
+        return 9
+    elif check_four_of_a_kind(cards) == True:
+        return 8
+    elif check_full_house(cards) == True:
+        return 7
+    elif check_flush(cards) == True:
+        return 6
+    elif check_street(cards) == True:
+        return 5
+    elif check_three_of_a_kind(cards) == True:
+        return 4
+    elif check_two_pairs(cards) == True:
+        return 3
+    elif check_one_pair(cards) == True:
+        return 2
+    else:
+        return 1
 
-    pass
+def play(hand, dec):
+    # The riv variable is a deck containing 7 cards, 2 from the player and 5 from 3 rounds of playing
+    riv = hand + dec
+    best_hand = 0
+    possible_combos = itertools.combinations(riv, 5)
+    for c in possible_combos:
+        current_hand = list(c)
+        hand_value = combinations(current_hand)
+        if hand_value > best_hand:
+            best_hand = hand_value
+    return hand_dict[best_hand], best_hand
 
 # There will be significant changes in the main function, but I will fix it later
 def main():
     balance = deposit()
     table = tables()
     players = number_of_players()
-    players_cards = cards_dealing(players)
+    
     if players == 2:
         if table == 1:
-            heads_up_1st_table(balance)
+            heads_up_1st_table(balance, players)
         elif table == 2:
             heads_up_2nd_table()
         elif table == 3:
             heads_up_3d_table()
-    bet_preflop(table, balance, players)
-    flopp = flop()
-    ter = tern(flopp)
-    riv = river(ter)
-    combinations(players_cards, riv)
 
 main()
