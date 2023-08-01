@@ -20,8 +20,8 @@ def number_of_players():
 # This function asks a player how much he/she wants to deposit
 def deposit():
     while True:
-        deposit = input("How much do you want to deposit? The minimum deposit is $100 and maximum is $10000.  $")
-        if deposit.isdigit() and int(deposit) in range(100, 10001):
+        deposit = input("How much do you want to deposit? The minimum deposit is $200 and maximum is $10000.  $")
+        if deposit.isdigit() and int(deposit) in range(200, 10001):
             return int(deposit)
         else:
             print("Please enter a valid number")
@@ -320,7 +320,6 @@ def heads_up_1st_table(balance, players):
             print(f"It is a tie.")
             balance += bank / 2
             opponents_balance += bank / 2
-    pass
 
 # The opponent raises his bet!
 # I think I must make sure that the opponent will not bet more than he has
@@ -383,7 +382,7 @@ def river(river):
     return river
 
 # This function checks all possible combinations. It is not finished 
-def combinations(cards):
+def combination(cards):
     ranks_count = {'2': 1, '3': 2, '4': 3, '5': 4, '6': 5, '7': 6, '8': 7, '9': 8, 'T': 9, 'J': 10, 'Q': 11, 'K': 12, 'A': 13}
     
     # Finish it later
@@ -401,10 +400,11 @@ def combinations(cards):
         
     def check_four_of_a_kind(cards):
         values = [i[0] for i in cards]
+        print(values)
         value_counts = defaultdict(lambda: 0)
         for v in values:
             value_counts[v] += 1
-        if sorted(value_counts.values) == [1, 4]:
+        if sorted(value_counts.values()) == [1, 4]:
             return True
         else:
             return False
@@ -414,7 +414,7 @@ def combinations(cards):
         value_counts = defaultdict(lambda: 0)
         for v in values:
             value_counts[v] += 1
-        if sorted(value_counts.values) == [2, 3]:
+        if sorted(value_counts.values()) == [2, 3]:
             return True
         else:
             return False
@@ -436,7 +436,7 @@ def combinations(cards):
             value_counts[v] += 1
         rank_score = [ranks_count[i] for i in values]
         rank_range = max(rank_score) - min(rank_score)
-        if rank_range == 4 and len(set(value_counts.values)) == 1:
+        if rank_range == 4 and len(set(value_counts.values())) == 1:
             return True
         else:
             if set(values) == set(['A', '2', '3', '4', '5']):
@@ -448,7 +448,7 @@ def combinations(cards):
         value_counts = defaultdict(lambda: 0)
         for v in values:
             value_counts[v] += 1
-        if sorted(value_counts.values) == [1, 3]:
+        if sorted(value_counts.values()) == [1, 3]:
             return True
         else:
             return False
@@ -458,7 +458,7 @@ def combinations(cards):
         value_counts = defaultdict(lambda: 0)
         for v in values:
             value_counts[v] += 1
-        if sorted(value_counts.values) == [2, 2]:
+        if sorted(value_counts.values()) == [2, 2]:
             return True
         else:
             return False
@@ -468,7 +468,8 @@ def combinations(cards):
         value_counts = defaultdict(lambda: 0)
         for v in values:
             value_counts[v] += 1
-        if sorted(value_counts.values) == [1, 2]:
+        if sorted(value_counts.values()) == [1, 2]:
+
             return True
         else:
             return False
@@ -497,9 +498,12 @@ def play(hand, dec):
     riv = hand + dec
     best_hand = 0
     possible_combos = itertools.combinations(riv, 5)
+    possible_combos = list(possible_combos)
+    
     for c in possible_combos:
         current_hand = list(c)
-        hand_value = combinations(current_hand)
+        print(current_hand)
+        hand_value = combination(current_hand)
         if hand_value > best_hand:
             best_hand = hand_value
     return hand_dict[best_hand], best_hand
