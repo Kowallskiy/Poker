@@ -127,10 +127,11 @@ def opponent_after_preflop(answer, balance, opponents_balance, bank, big_blind):
             print(f"The bank: ${bank}")
             return balance, opponents_balance, bank, False
         else:
-            if opponents_balance >= 0.65 * bank:
-                print(f"The opponent bets ${0.65 * bank}")
-                bank += 0.65 * bank
-                opponents_balance -= 0.65 * bank
+            if opponents_balance >= bank:
+                bank_bet = bank
+                print(f"The opponent bets ${bank_bet}")
+                bank += bank_bet
+                opponents_balance -= bank_bet
             else:
                 print(f"The opponent bets his last ${opponents_balance}")
                 bank += opponents_balance
@@ -169,8 +170,8 @@ def opponent_after_preflop(answer, balance, opponents_balance, bank, big_blind):
                             print("Invalid response")
             else:
                 # CHeck whether somebody folded
-                response = input(f"The opponent bet ${0.65 * bank}. Do you want to call, reraise or fold? ")
-                bank, balance, opponents_balance, folded = opponent_bets(response, 0.65 * bank, bank, balance, opponents_balance)
+                response = input(f"The opponent bet ${bank_bet}. Do you want to call, reraise or fold? ")
+                bank, balance, opponents_balance, folded = opponent_bets(response, bank_bet, bank, balance, opponents_balance)
                 if folded == True:
                     return balance, opponents_balance, bank, True
                 else:
@@ -236,7 +237,7 @@ def opponent_bets(answer, bet, bank, balance, opponents_balance):
                     opponents_balance += bet - balance
                     balance = 0
                     return bank, balance, opponents_balance, False
-                if reraise.isdigit() and bet < int(reraise) <= balance:
+                elif reraise.isdigit() and bet < int(reraise) <= balance:
                     print(f"Your reraise is ${reraise}")
                     balance -= int(reraise)
                     bank += int(reraise)
@@ -253,6 +254,7 @@ def opponent_bets(answer, bet, bank, balance, opponents_balance):
                         return bank, balance, opponents_balance, True
                 else:
                     print("Invalid reraise")
+                    continue
         elif answer.lower() == 'fold':
             opponents_balance += bank
             return bank, balance, opponents_balance, True
@@ -266,6 +268,8 @@ def heads_up_1st_table(depos, players, balance):
     big_blind = 2
     opponents_balance = 200
     while True:
+        if opponents_balance == 0:
+            opponents_balance = 200
         bank = 3
         players_cards, deck = cards_dealing(players)
         print(f"Your balance: ${balance}. The opponent's balance: ${opponents_balance}")
@@ -287,7 +291,9 @@ def heads_up_1st_table(depos, players, balance):
         
             if opponents_balance == 0:
                 bool = zero_balance_opponent(opponents_balance)
-                if bool == True: continue
+                if bool == True: 
+                    opponents_balance == 200
+                    continue
                 else: return
             elif balance == 0:
                 bool = zero_balance_player(depos)
@@ -332,7 +338,9 @@ def heads_up_1st_table(depos, players, balance):
         
             if opponents_balance == 0:
                 bool = zero_balance_opponent(opponents_balance)
-                if bool == True: continue
+                if bool == True: 
+                    opponents_balance == 200
+                    continue
                 else: return
             elif balance == 0:
                 bool = zero_balance_player(depos)
@@ -351,13 +359,16 @@ def heads_up_1st_table(depos, players, balance):
         
         if opponents_balance == 0:
             bool = zero_balance_opponent(opponents_balance)
-            if bool == True: continue
+            if bool == True: 
+                opponents_balance == 200
+                continue
             else: return
         elif balance == 0:
             bool = zero_balance_player(depos)
             if bool == True:
                 balance = 200
                 depos -= balance
+                continue
             else: return
 
 def check_winning(players_cards, dec, balance, bank, opponents_balance):
@@ -384,7 +395,6 @@ def zero_balance_opponent(opponents_balance):
     while True:
         another_op = input('The opponent lost all his money. Do you want to play against another one (yes/no)? ')
         if another_op.lower() == 'yes':
-            opponents_balance == 200
             return True
         elif another_op.lower() == 'no':
             return False
@@ -409,10 +419,53 @@ def zero_balance_player(depos):
 # The opponent raises his bet!
 # I think I must make sure that the opponent will not bet more than he has
 def rise(bank, opponents_balance, balance, bet):
+    if opponents_balance >= 3*bet:
+        print(f"Opponent raises his last ${opponents_balance}")
+        bank += opponents_balance
+        if balance >= opponents_balance:
+            while True:
+                response = input(f"Do you want to call ${opponents_balance} or fold? ")
+                if response == 'call':
+                    bank += opponents_balance
+                    balance -= opponents_balance
+                    opponents_balance = 0
+                    return bank, balance, opponents_balance, False
+                elif response == 'fold':
+                    opponents_balance = bank
+                    return bank, balance, opponents_balance, True
+                else:
+                    print("Invalid response.")
+        else:
+            while True:
+                response = input(f"You have last ${balance}. Do you want to call or fold? ")
+                if response == 'call':
+                    bank += 2*balance - opponents_balance
+                    opponents_balance += opponents_balance - balance
+                    balance = 0
+                    return bank, balance, opponents_balance, False
+                elif response == 'fold':
+                    opponents_balance += bank
+                    return bank, balance, opponents_balance, True
+                else:
+                    print("Invalid response.")
+                    continue
     print(f"The opponent raises ${3 * bet}")
     opponents_balance -= 3 * bet
     bank += 3 * bet
     while True:
+        if balance <= 3*bet:
+            an = input(f"You have last ${balance}.Do you want to call or fold? ")
+            if an == 'call':
+                bank += balance
+                opponents_balance += 3*bet - balance
+                balance = 0
+                return bank, balance, opponents_balance, False
+            elif an == 'fold':
+                opponents_balance += bank
+                return bank, balance, opponents_balance, True
+            else:
+                print("Invalid input.")
+                continue
         answer = input(f"Do you want to call ${3 * bet}, reraise or fold? ")
         if answer.lower() == 'call':
             # I do not subtract 3*bet because the player already bet 1*bet, so he needs to call only 2*bet
@@ -422,7 +475,7 @@ def rise(bank, opponents_balance, balance, bet):
         elif answer.lower() == 'reraise':
             while True:
                 reraise = input("How much do you want to reraise? $")
-                if reraise.isdigit() and 3*bet < int(reraise) <= balance + bet:
+                if reraise.isdigit() and 3*bet < int(reraise) <= balance:
                     print(f"Your reraise is ${reraise}")
                     balance -= int(reraise) + bet
                     bank += int(reraise) - bet
