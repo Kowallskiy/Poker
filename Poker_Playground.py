@@ -45,8 +45,10 @@ def cards_dealing(players):
 # call, raise or fold, and returns updated bank, balance, and action
 def preflop_round(small_blind, bank, balance, opponents_balance, position):
     if position % 2 == 1:
+        print(f"Your balance: ${balance - small_blind}. The opponent's balance: ${opponents_balance - 2*small_blind}")
+        print(f'Bank: ${bank}')
         while True:
-            first_round = input('You are small blind. Do you want to call, raise or fold? ')
+            first_round = input(f'You are small blind. Do you want to call ${small_blind}, raise or fold? ')
             if first_round.lower() == 'call':
                 opponents_balance -= 2 * small_blind
                 bank += small_blind
@@ -56,7 +58,7 @@ def preflop_round(small_blind, bank, balance, opponents_balance, position):
                 opponents_balance -= 2 * small_blind
                 return bank, first_round.lower(), balance, opponents_balance
             elif first_round.lower() == 'fold':
-                opponents_balance += bank - 2 * small_blind
+                opponents_balance += bank
                 balance -= small_blind
                 return bank, first_round.lower(), balance, opponents_balance
             else:
@@ -97,8 +99,8 @@ def on_button(bank, response, balance, opponents_balance, small_blind):
             return bank, balance, opponents_balance, False
         else:
             print(f"You called with your last ${balance}")
-            bank += 2 * balance - 4*small_blind
-            opponents_balance += 4*small_blind - balance
+            bank = bank + 2 * balance - 4*small_blind
+            opponents_balance = opponents_balance + 4*small_blind - balance
             balance = 0
             return bank, balance, opponents_balance, False
     elif response == 'raise':
@@ -140,7 +142,7 @@ def on_button(bank, response, balance, opponents_balance, small_blind):
                 if 0 <= random.random() <= 0.5:
                     print(f"Opponent called ${int(reraise)-5*small_blind}")
                     bank += int(reraise) - 5*small_blind
-                    opponents_balance -= int(reraise) + 5 * small_blind
+                    opponents_balance = opponents_balance - int(reraise) + 5 * small_blind
                     return bank, balance, opponents_balance, False
                 else:
                     print("Opponent folded")
@@ -173,7 +175,7 @@ def round_f(answer, bank, balance, opponents_balance, big_blind):
             # Write how the opponent will respond to player's call
             if 0 <= random.random() <= 0.85:
                 print("The opponent checks.")
-                print(f"Your balance: ${balance}. The opponent's balance: ${opponents_balance}")
+                print(f"Your balance: ${balance}. Opponent's balance: ${opponents_balance}")
                 print(f"The bank: ${bank}")
                 return bank, balance, opponents_balance, False
             # I have to fix it, because it is raise, but I used rise function for reraise
@@ -183,9 +185,9 @@ def round_f(answer, bank, balance, opponents_balance, big_blind):
         elif answer == 'raise':
             while True:
                 raise_ = input("How much do you want to raise? $")
-                if raise_.isdigit() and 2 < int(raise_) <= balance:
-                    bank += int(raise_) - 1
-                    balance -= int(raise_) + 1
+                if raise_.isdigit() and 2 < int(raise_) <= balance + big_blind/2:
+                    bank += int(raise_) - int(big_blind/2)
+                    balance -= int(raise_)
                     print(f"Your balance: ${balance}. The opponent's balance: ${opponents_balance}")
                     print(f"The bank: ${bank}")
                     break
@@ -193,18 +195,18 @@ def round_f(answer, bank, balance, opponents_balance, big_blind):
                     print(f"You do not have that much money. Your balance: {balance}")
                 else: print("Invalid raise")
             if 0 <= random.random() < 0.5:
-                if opponents_balance < int(raise_) - 2:
+                if opponents_balance < int(raise_) - big_blind:
                     print(f"The opponent called with his last money ${opponents_balance}")
-                    bank += 2 * opponents_balance - int(raise_) - 2
-                    balance += int(raise_) - opponents_balance - 2
+                    bank += 2 * opponents_balance + 2 * big_blind - int(raise_)
+                    balance += int(raise_) - opponents_balance - big_blind
                     opponents_balance = 0
-                    print(f"Your balance: ${balance}. The opponent's balance: ${opponents_balance}")
+                    print(f"Your balance: ${balance}. Opponent's balance: ${opponents_balance}")
                     print(f"The bank: ${bank}")
                     return bank, balance, opponents_balance, False
                 else:
                     print(f"The opponent called ${raise_}")
-                    bank += int(raise_) - 2
-                    opponents_balance -= int(raise_) + 2
+                    bank += int(raise_) - big_blind
+                    opponents_balance = opponents_balance - int(raise_) + big_blind
                     print(f"Your balance: ${balance}. The opponent's balance: ${opponents_balance}")
                     print(f"The bank: ${bank}")
                     return bank, balance, opponents_balance, False
@@ -256,10 +258,10 @@ def opponent_on_button_after_preflop(bank, opponents_balance):
                 response = input(f"Do you want to call ${opponents_balance} or fold? ")
                 if response.lower() == 'call':
                     opponents_balance = 0
-                    return response.lower(), bank, opponents_balance, 0
+                    return response.lower(), bank, opponents_balance, last_bet
                 elif response.lower() == 'fold':
                     opponents_balance = 0
-                    return response.lower(), bank, opponents_balance, 0
+                    return response.lower(), bank, opponents_balance, last_bet
                 else: print("Invalid response.")
 
 def players_action_on_button_after_preflop(response, bank, opponents_balance, bet, balance):
@@ -521,8 +523,8 @@ def heads_up_1st_table(depos, players, balance):
             opponents_balance = 200
         bank = 3
         players_cards, deck = cards_dealing(players)
-        print(f"Your balance: ${balance}. The opponent's balance: ${opponents_balance}")
         bank, answer, balance, opponents_balance = preflop_round(small_blind, bank, balance, opponents_balance, position)
+        
         if answer == 'fold':
             position += 1
             continue
@@ -530,6 +532,8 @@ def heads_up_1st_table(depos, players, balance):
             bank, balance, opponents_balance, folded = round_f(answer, bank, balance, opponents_balance, big_blind)
         else:
             bank, balance, opponents_balance, folded = on_button(bank, answer, balance, opponents_balance, small_blind)
+            print(f"Your balance: ${balance}, opponent's balance: ${opponents_balance}")
+            print(f"Bank: ${bank}")
         if folded == True:
             position += 1
             continue
