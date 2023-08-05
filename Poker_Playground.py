@@ -1,6 +1,7 @@
 import random
 import itertools
 from collections import defaultdict
+from math import ceil, floor
 
 PLAYERS = 2
 RANK = "AKQJT98765432"
@@ -189,8 +190,51 @@ def round_f(answer, bank, balance, opponents_balance, big_blind):
                 return bank, balance, opponents_balance, False
             # I have to fix it, because it is raise, but I used rise function for reraise
             elif 0.85 < random.random() < 1:
-                bank, balance, opponents_balance, folded = rise(bank, opponents_balance, balance, big_blind)
-                return bank, balance, opponents_balance, folded
+                if opponents_balance >= 2 * big_blind:
+                    opponents_balance -= 2 * big_blind
+                    bank += 2 * big_blind
+                    print(f"Opponent raises ${3 * big_blind}")
+                    while True:
+                        response = input(f"Do you want to call ${2 * big_blind}, reraise or fold? ")
+                        if response.lower().strip() == 'call':
+                            balance -= 2 * big_blind
+                            bank += 2 * big_blind
+                            print(f"You called ${2 * big_blind}")
+                            return bank, balance, opponents_balance, False
+                        elif response == 'reraise':
+                            while True:
+                                raise_ = input("How much do you want to reraise? $")
+                                if raise_.isdigit() and 3 * big_blind < int(raise_) <= balance + big_blind:
+                                    bank += int(raise_) - big_blind
+                                    balance = balance - int(raise_) + big_blind
+                                    print(f"Your balance: ${balance}. The opponent's balance: ${opponents_balance}")
+                                    print(f"The bank: ${bank}")
+                                    break
+                                elif int(raise_) > balance:
+                                    print(f"You do not have that much money. Your balance: {balance}")
+                                else: print("Invalid raise")
+                            if 0 <= random.random() < 0.5:
+                                if opponents_balance < int(raise_) - 3*big_blind:
+                                    print(f"The opponent called with his last money ${opponents_balance}")
+                                    bank = bank + 2 * opponents_balance - int(raise_)
+                                    balance = balance + int(raise_) - opponents_balance
+                                    opponents_balance = 0
+                                    print(f"Your balance: ${balance}. Opponent's balance: ${opponents_balance}")
+                                    print(f"The bank: ${bank}")
+                                    return bank, balance, opponents_balance, False
+                                else:
+                                    print(f"The opponent called ${raise_}")
+                                    bank = bank + int(raise_) - 3 * big_blind
+                                    opponents_balance = opponents_balance - int(raise_) + 3 * big_blind
+                                    print(f"Your balance: ${balance}. The opponent's balance: ${opponents_balance}")
+                                    print(f"The bank: ${bank}")
+                                    return bank, balance, opponents_balance, False
+                            else:
+                                print('Opponent folded')
+                                balance += bank
+                                print(f"Your balance: ${balance}. The opponent's balance: ${opponents_balance}")
+                                print(f"The bank: ${bank}")
+                                return bank, balance, opponents_balance, True
         elif answer == 'raise':
             while True:
                 raise_ = input("How much do you want to raise? $")
@@ -588,6 +632,7 @@ def heads_up_1st_table(depos, players, balance):
                     depos -= balance
                     continue
                 else: return
+            else: continue
         flopp, deck = flop(deck)
         if position % 2 == 1:
             answer = round_after_preflop()
@@ -609,7 +654,9 @@ def heads_up_1st_table(depos, players, balance):
 
             if opponents_balance == 0:
                 bool = zero_balance_opponent(opponents_balance)
-                if bool == True: continue
+                if bool == True:
+                    opponents_balance == 200
+                    continue
                 else: return
             elif balance == 0:
                 bool = zero_balance_player(depos)
@@ -618,6 +665,7 @@ def heads_up_1st_table(depos, players, balance):
                     depos -= balance
                     continue
                 else: return
+            else: continue
         riv, deck = tern(flopp, deck)
         if position % 2 == 1:
             answer = round_after_preflop()
@@ -649,6 +697,7 @@ def heads_up_1st_table(depos, players, balance):
                     depos -= balance
                     continue
                 else: return
+            else: continue
         dec = river(riv, deck)
         if position % 2 == 1:
             answer = round_after_preflop()
@@ -695,8 +744,8 @@ def check_winning(players_cards, dec, balance, bank, opponents_balance):
             return bank, balance, opponents_balance
         else:
             print("It is a tie.")
-            balance += int(bank / 2)
-            opponents_balance += int(bank / 2)
+            balance += ceil(bank / 2)
+            opponents_balance += floor(bank / 2)
             return bank, balance, opponents_balance
     if players_score > opponents_score:
         print(f"You won ${bank}")
@@ -708,8 +757,8 @@ def check_winning(players_cards, dec, balance, bank, opponents_balance):
         return bank, balance, opponents_balance
     else:
         print(f"It is a tie.")
-        balance += int(bank / 2)
-        opponents_balance += int(bank / 2)
+        balance += floor(bank / 2)
+        opponents_balance += ceil(bank / 2)
         return bank, balance, opponents_balance
        
 def zero_balance_opponent(opponents_balance):
