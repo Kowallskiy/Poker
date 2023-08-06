@@ -102,3 +102,6 @@ def bet_preflop(table, balance):
                     print('You cannot bet less than $100')
                 elif int(bet) > balance:
                     print(f"You do not have that much to bet. Your balance is ${balance}")
+
+s = ['J', 'K', 'A', 'T', 'Q']
+print(sorted(s))
