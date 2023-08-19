@@ -1030,7 +1030,6 @@ def river(river, deck):
 def combination(cards):
     ranks_count = {'2': 1, '3': 2, '4': 3, '5': 4, '6': 5, '7': 6, '8': 7, '9': 8, 'T': 9, 'J': 10, 'Q': 11, 'K': 12, 'A': 13}
     
-    
     def check_royal_flash(cards):
         values_r = [i[0] for i in cards]
         if check_flush(cards) and check_street(cards) and sorted(values_r) == ['A', 'J', 'K', 'Q', 'T']:
@@ -1103,7 +1102,6 @@ def combination(cards):
         if sorted(value_counts.values()) == [1, 2, 2]:
             return True
         else:
-            # print(sorted(value_counts.values()))
             return False
         
     def check_one_pair(cards):
@@ -1112,7 +1110,6 @@ def combination(cards):
         for v in values:
             value_counts[v] += 1
         if sorted(value_counts.values()) == [1, 1, 1, 2]:
-
             return True
         else:
             return False
