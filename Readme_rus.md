@@ -1,4 +1,6 @@
-# Texas Hold'em Heads-Up Poker against AI
+# Техасский холдем хэдс-ап против ИИ
+
+Язык: [English](README.md), Русский
 ___
 ![](Pictures/main_theme.jpg)
 ___
@@ -36,9 +38,9 @@ if opponents_balance >= int(reraise) - 6*small_blind:
         print(f"Bank: ${bank}")
 ```
 
-Reading the [code](Poker_Playground.py) would be enough to understand the AI strategy.
+Можно с легкостью понять стратегию ИИ ознакомившись с данным [кодом](Poker_Playground.py).
 
-I guess one of the most difficult challenges for me was writing the _'combinations'_ function, which checks all possible combinations and assigns a value to each of them. The code snippet below demonstrates how I executed it:
+Я думаю, что самым сложным было написание функций комбинаций, которые проверяют руку и придают её определенную ценность. Данный код демонстрирует то, как я с этим справился:
 
 ```Python
 ranks_count = {'2': 1, '3': 2, '4': 3, '5': 4, '6': 5, '7': 6, '8': 7, '9': 8, 'T': 9, 'J': 10, 'Q': 11, 'K': 12, 'A': 13}
@@ -149,11 +151,11 @@ ranks_count = {'2': 1, '3': 2, '4': 3, '5': 4, '6': 5, '7': 6, '8': 7, '9': 8, '
         return 1
 ```
 
-One more intriguing function is _'play'_. It takes two variables: _'dec'_, which represents the _5_ cards from all rounds of play, and _'hand'_, indicating the player's or opponent's _2_ cards. The function proceeds to generate all possible _5-card combinations_ from the _7_ available cards and evaluates their values. Ultimately, it returns the combination with the highest score. Below is the corresponding code snippet:
+Ещё одна интересная функция - __play__. Она принимает две переменные: __dec__ - представляет 5 карт со стола со всех раундов игры, и __hand__ - представляет карты с руки игрока или оппонента. Функция генерирует все возможные комбинации из 5-ти карт и возвращает комбинацию с наибольшей ценностью. Ниже представлена данная функция:
 
 ```Python
 def play(hand, dec):
-    # The riv variable is a deck containing 7 cards, 2 from the player/opponent and 5 from 3 rounds of playing
+    # Переменная riv состоит из 7-ми карт: 2 карты игрока/оппонента и 5 карт со стола
     riv = hand + dec
     best_hand = 0
     possible_combos = itertools.combinations(riv, 5)
@@ -166,7 +168,5 @@ def play(hand, dec):
             best_hand = hand_value
     return hand_dict[best_hand], best_hand
 ```
-
-After completing the project, I came to realize that I derived more enjoyment from debugging the code than actually playing poker. There are numerous ways in which this code could be enhanced, particularly in terms of its architecture. However, the process of writing nearly 1200 lines of code from scratch proved to be an essential learning experience.
 
 ![gif](https://i.gifer.com/7aKz.gif)

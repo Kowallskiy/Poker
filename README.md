@@ -1,8 +1,10 @@
 ## Texas Hold'em Heads-Up Poker against AI
+
+Language: English, [Русский](Readme_rus.md)
 ___
 ![](Pictures/main_theme.jpg)
 ___
-__Texas Hold'em__ is the most popular type of poker. I used to play it at tables with _9_ and _6_ people mostly. However, after a while, I decided to challenge myself and started playing Heads-Up. The main difference is that the dynamic of this game is aggressive. Unlike at tables with _9_ and _5_ players, you have to play around __80%__ of the dealt hands, depending on your balance. The lower your balance, the more aggressive your style must be due to the limited ways of protecting your hands.
+__Texas Hold'em__ is the most popular type of poker. I used to play it at tables with _9_ and _6_ people mostly. However, after a while, I decided to challenge myself and started playing Heads-Up. The main difference is that the dynamic of this game is aggressive. Unlike at tables with _9_ and _6_ players, you have to play around __80%__ of the dealt hands, depending on your balance. The lower your balance, the more aggressive your style must be due to the limited ways of protecting your hands.
 
 Here is the simplified chart of pre-flop hands that a player should play in a heads-up game:
 
